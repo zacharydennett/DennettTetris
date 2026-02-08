@@ -2,20 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Dennett Tetris</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
+  html, body {
     background: #1a1a2e;
     color: #eee;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    overflow: hidden;
   }
+
+  /* ===== DESKTOP LAYOUT ===== */
   #game-wrapper {
     display: flex;
     gap: 24px;
@@ -46,10 +54,7 @@
     font-weight: bold;
     color: #fff;
   }
-  #next-canvas {
-    display: block;
-    margin: 0 auto;
-  }
+  #next-canvas { display: block; margin: 0 auto; }
   #board-container {
     position: relative;
     border: 3px solid rgba(255,255,255,0.2);
@@ -57,9 +62,7 @@
     overflow: hidden;
     box-shadow: 0 0 40px rgba(100, 100, 255, 0.15);
   }
-  #game-canvas {
-    display: block;
-  }
+  #game-canvas { display: block; }
   #overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -74,7 +77,6 @@
   #overlay.hidden { display: none; }
   #overlay h1 { font-size: 36px; }
   #overlay p { font-size: 16px; color: #aaa; }
-  #overlay .subtitle { font-size: 14px; color: #666; }
   #start-btn {
     margin-top: 12px;
     padding: 12px 36px;
@@ -98,12 +100,155 @@
     border-radius: 4px;
     font-family: monospace;
   }
+
+  /* ===== MOBILE CONTROLS (hidden on desktop) ===== */
+  #mobile-controls { display: none; }
+
+  /* ===== MOBILE STATS BAR (hidden on desktop) ===== */
+  #mobile-stats { display: none; }
+
+  /* ===== MOBILE LAYOUT ===== */
+  @media (max-width: 700px) {
+    body {
+      align-items: flex-start;
+      overflow-y: auto;
+    }
+    #game-wrapper {
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 4px;
+      width: 100%;
+    }
+    #side-panel-left, #side-panel-right {
+      display: none;
+    }
+    #mobile-stats {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    #mobile-stats .stat-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 6px 14px;
+      text-align: center;
+      min-width: 70px;
+    }
+    #mobile-stats .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+    }
+    #mobile-stats .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #mobile-stats .mini-canvas-wrap {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #mobile-stats .mini-canvas-wrap .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+    }
+    #board-container {
+      border-width: 2px;
+      border-radius: 4px;
+    }
+    #overlay h1 { font-size: 24px; }
+    #overlay p { font-size: 14px; }
+    .controls-info { display: none; }
+
+    /* Touch controls */
+    #mobile-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 340px;
+      padding: 0 8px;
+    }
+    .ctrl-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .ctrl-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 14px;
+      color: #ddd;
+      font-size: 22px;
+      width: 72px;
+      height: 58px;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ctrl-btn:active, .ctrl-btn.active {
+      background: rgba(255,255,255,0.2);
+      transform: scale(0.93);
+    }
+    .ctrl-btn .btn-label {
+      font-size: 10px;
+      margin-top: 2px;
+      color: #999;
+    }
+    .ctrl-btn-wide {
+      width: 100px;
+    }
+    .ctrl-btn-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
 </style>
 </head>
 <body>
 
 <div id="game-wrapper">
-  <!-- Left Panel -->
+
+  <!-- Mobile stats bar (visible only on mobile) -->
+  <div id="mobile-stats">
+    <div class="stat-item">
+      <div class="stat-label">Score</div>
+      <div class="stat-value" id="m-score">0</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Level</div>
+      <div class="stat-value" id="m-level">1</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Lines</div>
+      <div class="stat-value" id="m-lines">0</div>
+    </div>
+    <div class="mini-canvas-wrap">
+      <div class="stat-label">Hold</div>
+      <canvas id="m-hold-canvas" width="56" height="56"></canvas>
+    </div>
+    <div class="mini-canvas-wrap">
+      <div class="stat-label">Next</div>
+      <canvas id="m-next-canvas" width="56" height="56"></canvas>
+    </div>
+  </div>
+
+  <!-- Left Panel (desktop only) -->
   <div id="side-panel-left">
     <div class="panel-box">
       <h3>Score</h3>
@@ -141,11 +286,37 @@
     </div>
   </div>
 
-  <!-- Right Panel -->
+  <!-- Right Panel (desktop only) -->
   <div id="side-panel-right">
     <div class="panel-box">
       <h3>Next</h3>
       <canvas id="next-canvas" width="120" height="400"></canvas>
+    </div>
+  </div>
+
+  <!-- Mobile touch controls (visible only on mobile) -->
+  <div id="mobile-controls">
+    <div class="ctrl-row">
+      <button class="ctrl-btn ctrl-btn-wide" id="btn-hold">
+        <div class="ctrl-btn-inner"><span>&#x1F91A;</span><span class="btn-label">HOLD</span></div>
+      </button>
+      <button class="ctrl-btn ctrl-btn-wide" id="btn-rotate">
+        <div class="ctrl-btn-inner"><span>&#x21BB;</span><span class="btn-label">ROTATE</span></div>
+      </button>
+      <button class="ctrl-btn ctrl-btn-wide" id="btn-drop">
+        <div class="ctrl-btn-inner"><span>&#x23EC;</span><span class="btn-label">DROP</span></div>
+      </button>
+    </div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn ctrl-btn-wide" id="btn-left">
+        <div class="ctrl-btn-inner"><span>&#x25C0;</span><span class="btn-label">LEFT</span></div>
+      </button>
+      <button class="ctrl-btn ctrl-btn-wide" id="btn-down">
+        <div class="ctrl-btn-inner"><span>&#x25BC;</span><span class="btn-label">DOWN</span></div>
+      </button>
+      <button class="ctrl-btn ctrl-btn-wide" id="btn-right">
+        <div class="ctrl-btn-inner"><span>&#x25B6;</span><span class="btn-label">RIGHT</span></div>
+      </button>
     </div>
   </div>
 </div>
@@ -171,11 +342,42 @@ nextCanvas.height = NEXT_COUNT * 100;
 const holdCanvas = document.getElementById('hold-canvas');
 const holdCtx = holdCanvas.getContext('2d');
 
+// Mobile canvases
+const mNextCanvas = document.getElementById('m-next-canvas');
+const mNextCtx = mNextCanvas.getContext('2d');
+const mHoldCanvas = document.getElementById('m-hold-canvas');
+const mHoldCtx = mHoldCanvas.getContext('2d');
+
 const overlay = document.getElementById('overlay');
 const startBtn = document.getElementById('start-btn');
 const scoreDisplay = document.getElementById('score-display');
 const levelDisplay = document.getElementById('level-display');
 const linesDisplay = document.getElementById('lines-display');
+
+// Mobile stat displays
+const mScoreDisplay = document.getElementById('m-score');
+const mLevelDisplay = document.getElementById('m-level');
+const mLinesDisplay = document.getElementById('m-lines');
+
+// ==================== RESPONSIVE CANVAS SCALING ====================
+function resizeBoard() {
+  const isMobile = window.innerWidth <= 700;
+  if (isMobile) {
+    const maxW = window.innerWidth - 16;
+    // Leave room for stats bar + controls + gaps
+    const maxH = window.innerHeight - 240;
+    const scaleW = maxW / (COLS * CELL);
+    const scaleH = maxH / (ROWS * CELL);
+    const scale = Math.min(scaleW, scaleH, 1);
+    canvas.style.width = (COLS * CELL * scale) + 'px';
+    canvas.style.height = (ROWS * CELL * scale) + 'px';
+  } else {
+    canvas.style.width = '';
+    canvas.style.height = '';
+  }
+}
+window.addEventListener('resize', resizeBoard);
+resizeBoard();
 
 // ==================== PIECE DEFINITIONS ====================
 const PIECES = [
@@ -258,7 +460,7 @@ imageFiles.forEach(file => {
 
 // ==================== GAME STATE ====================
 let board = [];
-let boardCells = []; // stores per-cell image data for locked pieces
+let boardCells = [];
 let current = null;
 let holdPiece = null;
 let holdUsed = false;
@@ -306,13 +508,7 @@ function spawnPiece(pieceIndex) {
   const p = PIECES[pieceIndex];
   const shape = p.rotations[0];
   const col = Math.floor((COLS - shape[0].length) / 2);
-  return {
-    pieceIndex,
-    rotation: 0,
-    x: col,
-    y: 0,
-    shape: shape
-  };
+  return { pieceIndex, rotation: 0, x: col, y: 0, shape };
 }
 
 function getShape(pieceIndex, rotation) {
@@ -333,7 +529,6 @@ function collides(shape, px, py) {
   return false;
 }
 
-// Compute tight bounding box of filled cells in a shape
 function getShapeBounds(shape) {
   let minR = Infinity, maxR = -1, minC = Infinity, maxC = -1;
   for (let r = 0; r < shape.length; r++) {
@@ -352,7 +547,6 @@ function getShapeBounds(shape) {
 function lockPiece() {
   const imgKey = PIECES[current.pieceIndex].image;
   const bounds = getShapeBounds(current.shape);
-
   for (let r = 0; r < current.shape.length; r++) {
     for (let c = 0; c < current.shape[r].length; c++) {
       if (current.shape[r][c]) {
@@ -360,13 +554,12 @@ function lockPiece() {
         const by = current.y + r;
         if (by >= 0) {
           board[by][bx] = 1;
-          // Store where this cell sits within the piece's bounding box
           boardCells[by][bx] = {
             imgKey,
-            cx: c - bounds.minC,  // column within bounding box
-            cy: r - bounds.minR,  // row within bounding box
-            bw: bounds.w,         // bounding box width in cells
-            bh: bounds.h          // bounding box height in cells
+            cx: c - bounds.minC,
+            cy: r - bounds.minR,
+            bw: bounds.w,
+            bh: bounds.h
           };
         }
       }
@@ -414,11 +607,12 @@ function updateDisplays() {
   scoreDisplay.textContent = score;
   levelDisplay.textContent = level;
   linesDisplay.textContent = lines;
+  mScoreDisplay.textContent = score;
+  mLevelDisplay.textContent = level;
+  mLinesDisplay.textContent = lines;
 }
 
 // ==================== DRAWING ====================
-
-// Draw image with "cover" scaling (fills target rect, crops overflow, centers)
 function drawImageCover(context, img, x, y, w, h) {
   const imgAspect = img.width / img.height;
   const boxAspect = w / h;
@@ -437,17 +631,14 @@ function drawImageCover(context, img, x, y, w, h) {
   context.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
-// Draw an entire piece as one image clipped to the piece shape
 function drawPieceImage(context, shape, imgKey, pieceScreenX, pieceScreenY, cellSize, alpha) {
   const img = images[imgKey];
   if (!img) return;
-
   const bounds = getShapeBounds(shape);
 
   context.save();
   if (alpha !== undefined && alpha !== 1) context.globalAlpha = alpha;
 
-  // Build clip path from all filled cells
   context.beginPath();
   for (let r = 0; r < shape.length; r++) {
     for (let c = 0; c < shape[r].length; c++) {
@@ -462,16 +653,13 @@ function drawPieceImage(context, shape, imgKey, pieceScreenX, pieceScreenY, cell
   }
   context.clip();
 
-  // Draw image scaled to the bounding box area
   const imgX = pieceScreenX + bounds.minC * cellSize;
   const imgY = pieceScreenY + bounds.minR * cellSize;
   const imgW = bounds.w * cellSize;
   const imgH = bounds.h * cellSize;
   drawImageCover(context, img, imgX, imgY, imgW, imgH);
-
   context.restore();
 
-  // Draw cell borders on top (not clipped, so they're crisp)
   for (let r = 0; r < shape.length; r++) {
     for (let c = 0; c < shape[r].length; c++) {
       if (shape[r][c]) {
@@ -485,30 +673,21 @@ function drawPieceImage(context, shape, imgKey, pieceScreenX, pieceScreenY, cell
   }
 }
 
-// Draw a single locked board cell using its stored piece-relative data
 function drawLockedCell(context, screenX, screenY, cellSize, cellData) {
   const img = images[cellData.imgKey];
   if (!img) return;
-
-  // The full image spans bw*cellSize x bh*cellSize.
-  // This cell is at offset (cx, cy) within that rectangle.
   const fullW = cellData.bw * cellSize;
   const fullH = cellData.bh * cellSize;
-
-  // Where the full image's top-left would be drawn
   const fullX = screenX - cellData.cx * cellSize;
   const fullY = screenY - cellData.cy * cellSize;
 
   context.save();
-  // Clip to just this cell
   context.beginPath();
   context.rect(screenX, screenY, cellSize, cellSize);
   context.clip();
-
   drawImageCover(context, img, fullX, fullY, fullW, fullH);
   context.restore();
 
-  // Border
   context.strokeStyle = 'rgba(255,255,255,0.35)';
   context.lineWidth = 1;
   context.strokeRect(screenX + 0.5, screenY + 0.5, cellSize - 1, cellSize - 1);
@@ -521,11 +700,9 @@ function ghostY() {
 }
 
 function drawBoard() {
-  // Background
   ctx.fillStyle = '#0f0f23';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Grid lines
   ctx.strokeStyle = 'rgba(255,255,255,0.03)';
   ctx.lineWidth = 1;
   for (let r = 0; r <= ROWS; r++) {
@@ -541,7 +718,6 @@ function drawBoard() {
     ctx.stroke();
   }
 
-  // Locked cells — each drawn from its stored piece-relative image data
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       if (board[r][c] && boardCells[r][c]) {
@@ -552,12 +728,10 @@ function drawBoard() {
 
   if (!current || gameOver) return;
 
-  // Ghost piece
   const gy = ghostY();
   drawPieceImage(ctx, current.shape, PIECES[current.pieceIndex].image,
     current.x * CELL, gy * CELL, CELL, 0.2);
 
-  // Ghost border outlines
   for (let r = 0; r < current.shape.length; r++) {
     for (let c = 0; c < current.shape[r].length; c++) {
       if (current.shape[r][c]) {
@@ -574,7 +748,6 @@ function drawBoard() {
     }
   }
 
-  // Current piece — single continuous image
   drawPieceImage(ctx, current.shape, PIECES[current.pieceIndex].image,
     current.x * CELL, current.y * CELL, CELL, 1);
 }
@@ -586,21 +759,32 @@ function drawPreview(context, pieceIndex, offsetX, offsetY, cellSize) {
   const h = shape.length;
   const startX = offsetX + (4 - w) * cellSize / 2;
   const startY = offsetY + (4 - h) * cellSize / 2;
-
   drawPieceImage(context, shape, p.image, startX, startY, cellSize, 1);
 }
 
 function drawNextQueue() {
+  // Desktop
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
   for (let i = 0; i < NEXT_COUNT && i < nextQueue.length; i++) {
     drawPreview(nextCtx, nextQueue[i], 8, i * 100 + 4, PREVIEW_CELL);
   }
+  // Mobile — just show next 1
+  mNextCtx.clearRect(0, 0, mNextCanvas.width, mNextCanvas.height);
+  if (nextQueue.length > 0) {
+    drawPreview(mNextCtx, nextQueue[0], 2, 2, 13);
+  }
 }
 
 function drawHold() {
+  // Desktop
   holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
   if (holdPiece !== null) {
     drawPreview(holdCtx, holdPiece, 8, 8, PREVIEW_CELL);
+  }
+  // Mobile
+  mHoldCtx.clearRect(0, 0, mHoldCanvas.width, mHoldCanvas.height);
+  if (holdPiece !== null) {
+    drawPreview(mHoldCtx, holdPiece, 2, 2, 13);
   }
 }
 
@@ -628,14 +812,12 @@ function moveLeft() {
     resetLockTimer();
   }
 }
-
 function moveRight() {
   if (!collides(current.shape, current.x + 1, current.y)) {
     current.x++;
     resetLockTimer();
   }
 }
-
 function moveDown() {
   if (!collides(current.shape, current.x, current.y + 1)) {
     current.y++;
@@ -644,7 +826,6 @@ function moveDown() {
   }
   return false;
 }
-
 function hardDrop() {
   let dropped = 0;
   while (!collides(current.shape, current.x, current.y + 1)) {
@@ -655,13 +836,11 @@ function hardDrop() {
   updateDisplays();
   lockPiece();
 }
-
 function rotate(dir) {
   const newRot = (current.rotation + dir + 4) % 4;
   const newShape = getShape(current.pieceIndex, newRot);
   const kicks = current.pieceIndex === 0 ? WALL_KICKS.I : WALL_KICKS.normal;
   const kickIndex = current.rotation;
-
   for (const [dx, dy] of kicks[kickIndex]) {
     if (!collides(newShape, current.x + dx, current.y - dy)) {
       current.x += dx;
@@ -673,7 +852,6 @@ function rotate(dir) {
     }
   }
 }
-
 function holdSwap() {
   if (holdUsed) return;
   holdUsed = true;
@@ -687,7 +865,6 @@ function holdSwap() {
   }
   drawHold();
 }
-
 function resetLockTimer() {
   if (lockTimer) clearTimeout(lockTimer);
   lockTimer = null;
@@ -700,7 +877,6 @@ function gameLoop(timestamp) {
     animationId = requestAnimationFrame(gameLoop);
     return;
   }
-
   if (timestamp - lastDrop > dropInterval) {
     if (!moveDown()) {
       if (!lockTimer) {
@@ -717,7 +893,6 @@ function gameLoop(timestamp) {
     lastDrop = timestamp;
     updateDisplays();
   }
-
   drawBoard();
   drawNextQueue();
   animationId = requestAnimationFrame(gameLoop);
@@ -743,13 +918,13 @@ function startGame() {
   overlay.classList.add('hidden');
   if (animationId) cancelAnimationFrame(animationId);
   animationId = requestAnimationFrame(gameLoop);
+  resizeBoard();
 }
 
-// ==================== INPUT ====================
+// ==================== KEYBOARD INPUT ====================
 document.addEventListener('keydown', (e) => {
   if (gameOver && e.code !== 'Enter') return;
   if (e.code === 'Enter' && gameOver) { startGame(); return; }
-
   if (e.code === 'KeyP') {
     paused = !paused;
     if (paused) {
@@ -760,23 +935,17 @@ document.addEventListener('keydown', (e) => {
     }
     return;
   }
-
   if (paused || !current) return;
-
   switch (e.code) {
     case 'ArrowLeft':  moveLeft(); break;
     case 'ArrowRight': moveRight(); break;
-    case 'ArrowDown':
-      softDropping = true;
-      moveDown();
-      break;
+    case 'ArrowDown':  softDropping = true; moveDown(); break;
     case 'ArrowUp':    rotate(1); break;
     case 'KeyZ':       rotate(-1); break;
     case 'Space':      hardDrop(); break;
     case 'KeyC':
     case 'ShiftLeft':
-    case 'ShiftRight':
-      holdSwap(); break;
+    case 'ShiftRight': holdSwap(); break;
   }
   e.preventDefault();
   drawBoard();
@@ -786,6 +955,98 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
   if (e.code === 'ArrowDown') softDropping = false;
 });
+
+// ==================== MOBILE TOUCH CONTROLS ====================
+function handleAction(action) {
+  if (gameOver || paused || !current) return;
+  switch (action) {
+    case 'left':   moveLeft(); break;
+    case 'right':  moveRight(); break;
+    case 'down':   moveDown(); break;
+    case 'rotate': rotate(1); break;
+    case 'drop':   hardDrop(); break;
+    case 'hold':   holdSwap(); break;
+  }
+  drawBoard();
+  drawNextQueue();
+}
+
+// Auto-repeat for left/right/down on touch hold
+let touchRepeatTimer = null;
+let touchRepeatInterval = null;
+
+function startRepeat(action) {
+  handleAction(action);
+  touchRepeatTimer = setTimeout(() => {
+    touchRepeatInterval = setInterval(() => handleAction(action), 70);
+  }, 200);
+}
+
+function stopRepeat() {
+  if (touchRepeatTimer) { clearTimeout(touchRepeatTimer); touchRepeatTimer = null; }
+  if (touchRepeatInterval) { clearInterval(touchRepeatInterval); touchRepeatInterval = null; }
+}
+
+// Wire up buttons
+const btnConfig = [
+  { id: 'btn-left',   action: 'left',   repeat: true },
+  { id: 'btn-right',  action: 'right',  repeat: true },
+  { id: 'btn-down',   action: 'down',   repeat: true },
+  { id: 'btn-rotate', action: 'rotate', repeat: false },
+  { id: 'btn-drop',   action: 'drop',   repeat: false },
+  { id: 'btn-hold',   action: 'hold',   repeat: false },
+];
+
+btnConfig.forEach(({ id, action, repeat }) => {
+  const btn = document.getElementById(id);
+
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    btn.classList.add('active');
+    if (repeat) {
+      startRepeat(action);
+    } else {
+      handleAction(action);
+    }
+  });
+
+  btn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    btn.classList.remove('active');
+    stopRepeat();
+  });
+
+  btn.addEventListener('touchcancel', (e) => {
+    btn.classList.remove('active');
+    stopRepeat();
+  });
+
+  // Also support mouse for testing on desktop
+  btn.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    btn.classList.add('active');
+    if (repeat) {
+      startRepeat(action);
+    } else {
+      handleAction(action);
+    }
+  });
+
+  btn.addEventListener('mouseup', (e) => {
+    btn.classList.remove('active');
+    stopRepeat();
+  });
+
+  btn.addEventListener('mouseleave', (e) => {
+    btn.classList.remove('active');
+    stopRepeat();
+  });
+});
+
+// Prevent scrolling/zooming on the game area
+document.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+}, { passive: false });
 
 // Initial button handler
 startBtn.addEventListener('click', startGame);
