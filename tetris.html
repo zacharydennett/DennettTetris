@@ -10,7 +10,8 @@
     background: #1a1a2e;
     color: #eee;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     touch-action: manipulation;
     -webkit-touch-callout: none;
@@ -111,14 +112,18 @@
   @media (max-width: 700px) {
     body {
       align-items: flex-start;
-      overflow-y: auto;
+      overflow: hidden;
     }
     #game-wrapper {
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 4px;
+      gap: 4px;
+      padding: 2px 4px;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      justify-content: flex-start;
     }
     #side-panel-left, #side-panel-right {
       display: none;
@@ -134,31 +139,31 @@
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
-      padding: 6px 14px;
+      padding: 4px 10px;
       text-align: center;
-      min-width: 70px;
+      min-width: 60px;
     }
     #mobile-stats .stat-label {
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #888;
     }
     #mobile-stats .stat-value {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: bold;
     }
     #mobile-stats .mini-canvas-wrap {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
-      padding: 4px 8px;
+      padding: 3px 6px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
     #mobile-stats .mini-canvas-wrap .stat-label {
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #888;
@@ -175,7 +180,7 @@
     #mobile-controls {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
       width: 100%;
       max-width: 340px;
       padding: 0 8px;
@@ -193,9 +198,9 @@
       border: 2px solid rgba(255,255,255,0.15);
       border-radius: 14px;
       color: #ddd;
-      font-size: 22px;
+      font-size: 20px;
       width: 72px;
-      height: 58px;
+      height: 50px;
       cursor: pointer;
       transition: background 0.1s, transform 0.1s;
       -webkit-tap-highlight-color: transparent;
@@ -363,9 +368,11 @@ const mLinesDisplay = document.getElementById('m-lines');
 function resizeBoard() {
   const isMobile = window.innerWidth <= 700;
   if (isMobile) {
+    // Use visualViewport if available (accounts for Safari URL bar)
+    const vpH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     const maxW = window.innerWidth - 16;
-    // Leave room for stats bar + controls + gaps
-    const maxH = window.innerHeight - 240;
+    // Reserve space: ~50px stats bar + ~140px controls + ~20px gaps/padding
+    const maxH = vpH - 210;
     const scaleW = maxW / (COLS * CELL);
     const scaleH = maxH / (ROWS * CELL);
     const scale = Math.min(scaleW, scaleH, 1);
@@ -375,6 +382,10 @@ function resizeBoard() {
     canvas.style.width = '';
     canvas.style.height = '';
   }
+}
+// Also resize when Safari URL bar shows/hides
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', resizeBoard);
 }
 window.addEventListener('resize', resizeBoard);
 resizeBoard();
