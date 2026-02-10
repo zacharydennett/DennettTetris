@@ -371,8 +371,8 @@ function resizeBoard() {
     // Use visualViewport if available (accounts for Safari URL bar)
     const vpH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     const maxW = window.innerWidth - 16;
-    // Reserve space: ~50px stats bar + ~140px controls + ~20px gaps/padding
-    const maxH = vpH - 210;
+    // Reserve space: ~50px stats bar + ~130px controls + ~50px gaps/padding/safe-area
+    const maxH = vpH - 260;
     const scaleW = maxW / (COLS * CELL);
     const scaleH = maxH / (ROWS * CELL);
     const scale = Math.min(scaleW, scaleH, 1);
